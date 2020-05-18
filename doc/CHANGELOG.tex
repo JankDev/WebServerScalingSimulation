@@ -1,0 +1,31 @@
+\documentclass{article}
+
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\title{Sprawozdanie z symulacji}
+\author{Robert Kraut}
+\begin{document}
+    \maketitle
+    \section{Informacje wstępne}
+    Zostały zebrane dane o serwerze ze strony \href{https://projectreactor.io/docs/netty/release/reference/index.html}{reactor-netty}. \\
+    Maksymalna długość kolejki oczekujących żądań wynosi 1000, maksymalna ilość połączeń 500 a 45s\newline
+    to maksymalny czas na uzyskanie połączenia.
+    \section{Model}
+    Ze względu na ograniczony czas pomijam specyfikację TCP/IP i skupiam się tylko na warstwie aplikacji \newline
+    modelu ISO/OSI i protokole HTTP w wersji 1.0.\newline
+    Rozważanymi parametrami będą:
+    - dla wejściowych:
+        - ilość żądań na sekundę
+    - wyjściowe:
+        - czas jaki upłynął od momentu zaakceptowania żądania do splasowania odpowiedzi w buforze
+    - stałe:
+        - czas wykonania określonego zadania
+        - długość kolejki
+        - czas umeszczenia danych w buforze
+    \section{Etap 1 - Przeprowadzenie rzeczywistej symulacji o małym obciążeniu}
+
+
+\end{document}
