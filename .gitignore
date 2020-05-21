@@ -1,3 +1,7 @@
 .idea/
-out/*
-!out/CHANGELOG.pdf
+build/
+.gradle/
+out/
+doc/*
+!doc/*.pdf
+!doc/*.tex

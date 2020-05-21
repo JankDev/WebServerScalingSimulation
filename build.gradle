@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+
+}
+
+task documentation(type: Exec) {
+    def documentationOutputDirectory = './doc'
+    def latexDocument = './doc/CHANGELOG.tex'
+    commandLine 'pdflatex', '-file-line-error', '-interaction=nonstopmode',
+            '-synctex=1', '-output-format=pdf', "-output-directory=${documentationOutputDirectory}", latexDocument
+}
