@@ -1,0 +1,3 @@
+rootProject.name = 'web-server-scaling-simulation'
+
+include 'stress-test'
