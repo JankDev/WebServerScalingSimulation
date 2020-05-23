@@ -4,28 +4,190 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+
+\graphicspath{{doc/}}
+
 
 \title{Sprawozdanie z symulacji}
 \author{Robert Kraut}
 \begin{document}
     \maketitle
-    \section{Informacje wstępne}
-    Zostały zebrane dane o serwerze ze strony \href{https://projectreactor.io/docs/netty/release/reference/index.html}{reactor-netty}. \\
-    Maksymalna długość kolejki oczekujących żądań wynosi 1000, maksymalna ilość połączeń 500 a 45s\newline
-    to maksymalny czas na uzyskanie połączenia.
-    \section{Model}
-    Ze względu na ograniczony czas pomijam specyfikację TCP/IP i skupiam się tylko na warstwie aplikacji \newline
-    modelu ISO/OSI i protokole HTTP w wersji 1.0.\newline
-    Rozważanymi parametrami będą:
-    - dla wejściowych:
-        - ilość żądań na sekundę
-    - wyjściowe:
-        - czas jaki upłynął od momentu zaakceptowania żądania do splasowania odpowiedzi w buforze
-    - stałe:
-        - czas wykonania określonego zadania
-        - długość kolejki
-        - czas umeszczenia danych w buforze
-    \section{Etap 1 - Przeprowadzenie rzeczywistej symulacji o małym obciążeniu}
 
+
+    \section{Informacje wstępne}
+    Serwer nieblokujący jaki będziemy badać to implementacja Netty - Reactor Netty.
+    Zostały zebrane dane o serwerze ze strony \href{https://projectreactor.io/docs/netty/release/reference/index.html}{reactor-netty}. \\
+    Maksymalna długość kolejki oczekujących żądań wynosi 1000, maksymalna ilość połączeń 500 a 45s
+    to maksymalny czas na uzyskanie połączenia.
+
+
+    \section{Etap 1 - Przeprowadzenie rzeczywistej symulacji}
+    Do przeprowadzanie rzeczywistego tak zwanego "stress testu" posłużę się programem JMeter. \newline
+    Wszystkie testy zostają przeprowadzone na już rozgrzanej JVM, by móc się skupić na wydajności serwera. \newline
+    W sumie zostało wykonanych 15 testów
+    \begin{itemize}
+        \item 5000 Użytkowników(requestów)
+        \item 10 000 Użytkowników
+        \item 25 000 Użytkowników
+        \item 50 000 Użytkowników
+        \item 100 000 Użytkownikóws
+    \end{itemize}
+    Dla każdego zestawu, zostały wykonene 3 testy, jedno z opóźnieniem(czas wykonania żądania po stronie serwera) \newline
+    100ms, jedno z 200ms i ostatnie 500ms.
+    Każdy taki zestaw był(ilość wątków) była wykonywana na przestrzeni 10 sekund, można więc powiedzieć, że \newline
+    użytkownicy/10sek to nasze \(requests/sec\).
+
+    Wyniki prezentują się nastepująco:
+
+    \subsection{5k}
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|}
+            \hline
+            Opóźnienie & \% obsłużonych & średni czas odpowiedzi & minimalny czas odpowiedzi & maksymalny czas odpowiedzi \\
+            \hline
+            100 & 100 & 105 & 100 & 210 \\
+            \hline
+            200 & 100 & 204 & 200 & 310 \\
+            \hline
+            500 & 100 & 506 & 500 & 634 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \subsection{10k}
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|}
+            \hline
+            Opóźnienie & \% obsłużonych & średni czas odpowiedzi & minimalny czas odpowiedzi & maksymalny czas odpowiedzi \\
+            \hline
+            100 & 100 & 104 & 100 & 179 \\
+            \hline
+            200 & 100 & 204 & 200 & 276 \\
+            \hline
+            500 & 100 & 504 & 500 & 572 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \subsection{25k}
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|}
+            \hline
+            Opóźnienie & \% obsłużonych & średni czas odpowiedzi & minimalny czas odpowiedzi & maksymalny czas odpowiedzi \\
+            \hline
+            100 & 100 & 109 & 100 & 207 \\
+            \hline
+            200 & 100 & 203 & 200 & 275 \\
+            \hline
+            500 & 100 & 503 & 500 & 572 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \subsection{50k}
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|}
+            \hline
+            Opóźnienie & \% obsłużonych & średni czas odpowiedzi & minimalny czas odpowiedzi & maksymalny czas odpowiedzi \\
+            \hline
+            100 & 78.57 & 116 & 100 & 275 \\
+            \hline
+            200 & 78.98 & 206 & 200 & 473 \\
+            \hline
+            500 & 79.09 & 506 & 500 & 826 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \subsection{100k}
+    \begin{center}
+        s
+        \begin{tabular}{|c|c|c|c|c|}
+            \hline
+            Opóźnienie & \% obsłużonych & średni czas odpowiedzi & minimalny czas odpowiedzi & maksymalny czas odpowiedzi \\
+            \hline
+            100 & 77.42 & 120 & 100 & 1213 \\
+            \hline
+            200 & 77.74 & 212 & 200 & 1264 \\
+            \hline
+            500 & 78.07 & 512 & 500 & 1535 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+    \subsection{200k}
+    \begin{center}
+        \begin{tabular}{|c|c|c|c|c|}
+            \hline
+            Opóźnienie & \% obsłużonych & średni czas odpowiedzi & minimalny czas odpowiedzi & maksymalny czas odpowiedzi \\
+            \hline
+            100 & 76.23 & 123 & 100 & 1658 \\
+            \hline
+            200 & 77.60 & 216 & 200 & 1648 \\
+            \hline
+            500 & 78.69 & 517 & 500 & 2020 \\
+            \hline
+        \end{tabular}
+    \end{center}
+
+
+    \section{Etap 2 - Model}
+    Ze względu na ograniczony czas pomijam specyfikację TCP/IP i skupiam się tylko na warstwie aplikacji smodelu ISO/OSI i protokole HTTP.\newline
+    Jest wiele możliwych parametrów, które można rozważyć, m.in:
+    \begin{itemize}
+        \item ilość żądań na sekundę
+        \item czas zaakceptowania połączenia
+        \item czas jaki upłynął od momentu zaakceptowania żądania do splasowania odpowiedzi w buforze
+        \item czas wykonania określonego zadania
+        \item długość kolejki
+        \item czas umieszczenia danych w buforze
+        \item jak długo użytkownik czekał na odpowiedź
+        \item odsetek obsłużonych użytkwników
+    \end{itemize}
+
+
+    \section{Etap 3 - Symulacja}
+    Symulacja będzie polegała na wizualizacji funkcji kilku zmiennych. \newline
+    Jak już wcześniej wspomniane, by uprościć model zakładamy, że "TCP handshake" jest natychmiastowy.
+    Funkcja będzie mieć nastapującę stałe wynikające z specyfikacji serwera:
+    \begin{itemize}
+        \item 1000 - rozmiar kolejki
+        \item 500 - maksymalna ilość jednoczesnych połączeń
+    \end{itemize} oraz następujące parametry:
+    \begin{itemize}
+        \item d - delay, czas wykonania żądania
+        \item us - ilość użytkowników na sekundę
+        \item u - sumaryczna ilość użytkowników
+        \item t - konkretna chwila w czasie
+        \item p - odsetek obsłużonych żądań
+    \end{itemize}
+
+    Co z tych danych możemy wywnioskować, że w danym momencie może być maksymalnie tyle użytkowników, które serwer obsługuje lub może obsłużyć.
+    Możemy także zauważyć, że im większe opóźnienie, tym większy procent, prawdopodobnie spowodowane jest to tym, że
+    w czasie kiedy nic się nie dzieje wątek główny dalej może obsługiwać inne żadania.
+
+    Dane z symulacji zostały wrzucone do programu interpolującego funkcję.
+    Najbardziej odwzorującą wydaje być się funkcja eksponencjalna.\newline
+    Jako oś \emph{x} została wybrana liczba użytkowników, a jako oś \emph{y} procent obsłużonych requestów.
+
+    \begin{equation*}
+        y = 100 - \frac{d-3}{d}*29*(1-e^\frac{-x}{Q+M}))
+    \end{equation*},gdzie \emph{x} to liczba użytkowników na sekundę,\newline
+                          \emph{y} to procent udanych obsłużeń użytkowników, \newline
+                          \emph{d} to czas wykonania żądania(delay) \newline
+                          a \emph{Q} i \emph{M} to odpowiednio rozmiar kolejki oraz maksymalna liczba równoległych połączeń.
+
+    Wykres tej funkcji dla \emph{d=300} prezentuje się następująco.
+
+    \begin{figure*}[ht!]
+        \centering
+        \includegraphics[width=\linewidth]{doc/function.png}
+        \label{fig:figure}
+    \end{figure*}
+
+    Z wykresu można wywnioskować, że funkcja zbiega do ok. 70\%. Niestety funkcja za wcześnie zaczyna maleć, bo na wykresie
+    widać, że od wartości 2500r/s funkcja drastycznie maleje, co jest niezgodne z prawdą, gdyż według naszych testów dopiero od 5000r/s.
 
 \end{document}
