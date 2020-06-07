@@ -26,6 +26,12 @@
     \section{Etap 1 - Przeprowadzenie rzeczywistej symulacji}
     Do przeprowadzanie rzeczywistego tak zwanego "stress testu" posłużę się programem JMeter. \newline
     Wszystkie testy zostają przeprowadzone na już rozgrzanej JVM, by móc się skupić na wydajności serwera. \newline
+    Sprzęt, na którym testy zostały wykonanie to laptop Dell Inspiron o następujących parametrach:
+    \begin{itemize}
+        \item 8GB RAM
+        \item 256GB pamięci SSD
+        \item procesor Intel(R) Core(TM) i5-8265U CPU @ 1.60GHz
+    \end{itemize} z system operacyjnym LinuxMint 19.1 (tessa). \newline
     W sumie zostało wykonanych 15 testów
     \begin{itemize}
         \item 5000 Użytkowników(requestów)
@@ -103,7 +109,6 @@
 
     \subsection{100k}
     \begin{center}
-        s
         \begin{tabular}{|c|c|c|c|c|}
             \hline
             Opóźnienie & \% obsłużonych & średni czas odpowiedzi & minimalny czas odpowiedzi & maksymalny czas odpowiedzi \\
@@ -144,13 +149,18 @@
         \item długość kolejki
         \item czas umieszczenia danych w buforze
         \item jak długo użytkownik czekał na odpowiedź
-        \item odsetek obsłużonych użytkwników
+        \item odsetek obsłużonych użytkowników
     \end{itemize}
+
+    Jednak w naszym przypadku skupimy się tylko na ilości żądań na sekundę, czasu wykonania określonego zadania oraz
+    odsetku obsłużonych żądań.
 
 
     \section{Etap 3 - Symulacja}
     Symulacja będzie polegała na wizualizacji funkcji kilku zmiennych. \newline
-    Jak już wcześniej wspomniane, by uprościć model zakładamy, że "TCP handshake" jest natychmiastowy.
+    Jak już wcześniej wspomniane, by uprościć model zakładamy, że "TCP handshake" jest natychmiastowy oraz
+    że nie wspieramy cachowania zapytań, jak i optymalizacji, które robi za nas przeglądarka internetowa.
+    Nie bierzemy także pod uwagę stanu maszyny oraz systemu operacyjnego, na którym serwer działa
     Funkcja będzie mieć nastapującę stałe wynikające z specyfikacji serwera:
     \begin{itemize}
         \item 1000 - rozmiar kolejki
@@ -175,19 +185,36 @@
     \begin{equation*}
         y = 100 - \frac{d-3}{d}*29*(1-e^\frac{-x}{Q+M}))
     \end{equation*},gdzie \emph{x} to liczba użytkowników na sekundę,\newline
-                          \emph{y} to procent udanych obsłużeń użytkowników, \newline
-                          \emph{d} to czas wykonania żądania(delay) \newline
-                          a \emph{Q} i \emph{M} to odpowiednio rozmiar kolejki oraz maksymalna liczba równoległych połączeń.
+    \emph{y} to procent udanych obsłużeń użytkowników, \newline
+    \emph{d} to czas wykonania żądania(delay) \newline
+    a \emph{Q} i \emph{M} to odpowiednio rozmiar kolejki oraz maksymalna liczba równoległych połączeń.
 
-    Wykres tej funkcji dla \emph{d=300} prezentuje się następująco.
+    Jako iż według naszych testów odsetek obsłużonych requestów nie maleje liniowo, tylko istnieje jakiś punkt \textbf{$x_0$}, \newline
+    przy którym osiągnięto maksymalną liczbę jednoczesnych połączęń oraz kolejka została zapełniona, od którego funkcja
+    przyjmuje nagły spadek. \newline Z tych też właśnie powodów została wybrana funkcja eksponencjalna zaczynające się
+    od punktu (0,100).
+    Zostało to uwzględnione w naszej funkcji, gdzie nasze $x$ dzielimy przez właśnię sumę tych dwóch czynników. \newline
+    Kolejną rzeczą, którą trzeba było uwzględnić to to, że wraz ze wzrostem opóźnienia(czasu wykonania żądania),
+    procent obsłużonych requestów rośnie. Jak spojrzymy na funkcję to widzimy, że mamy współczynnik $\frac{d-3}{d}$, czyli
+    wraz z większym opóźnieniem ten współczynnik maleje. Cały odjemnik został jeszcze przemnożony przez liczbę pierwszą, aby
+    była bliższa rzeczywistości.\newline
 
-    \begin{figure*}[ht!]
+
+    Wykres tej funkcji dla $d=300$ wygląda następująco.
+
+    \begin{figure}[H]
         \centering
         \includegraphics[width=\linewidth]{doc/function.png}
         \label{fig:figure}
-    \end{figure*}
+    \end{figure}
 
-    Z wykresu można wywnioskować, że funkcja zbiega do ok. 70\%. Niestety funkcja za wcześnie zaczyna maleć, bo na wykresie
-    widać, że od wartości 2500r/s funkcja drastycznie maleje, co jest niezgodne z prawdą, gdyż według naszych testów dopiero od 5000r/s.
+    \section{Wnioski}
+    Z wykresu można wywnioskować, że funkcja zbiega do ok. $70\%$.\newline Niestety funkcja za wcześnie zaczyna maleć, bo na wykresie
+    widać, że od wartości $2500r/s$ funkcja drastycznie maleje, co jest niezgodne z prawdą, gdyż według naszych testów dopiero od $5000r/s$,
+    jednakże jest wiele czynników, które na to wpływają jak między innymi: wybrana implementacja danego nieblokującego serwera,
+    narzędzie do testowania jak i wersja Javy, dlatego można przyjąć, że błędy są w zakresie do zaakceptowania.\newline
+    Widać także, że funkcja nie maleje tak drastycznie od pewnego momentu, tylko bardzo powoli. Przyczyną tego zdarzenia
+    jest prawdopodobnie to, że jak serwer zapełnimy już żądaniami do jego limitu, to po obsłużeniu ich może przyjmować
+    nowe połączenia.
 
 \end{document}
